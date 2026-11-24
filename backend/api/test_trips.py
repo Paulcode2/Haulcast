@@ -100,6 +100,9 @@ class CheckpointTests(SimpleTestCase):
 class TripAPITests(SimpleTestCase):
     def setUp(self):
         self.client = APIClient()
+        weather_patch = patch("api.views.enrich_routes", return_value={"complete": 0, "partial": 0, "unavailable": 0})
+        weather_patch.start()
+        self.addCleanup(weather_patch.stop)
         self.payload = {"origin": "Frankfurt am Main, Germany", "destination": "Kassel, Germany", "departure_time": DEPARTURE.isoformat(), "load_weight_lbs": 12000}
 
     def post(self, payload=None):
@@ -195,6 +198,18 @@ class ProviderTests(SimpleTestCase):
             with self.assertRaises(TripError) as caught:
                 fetch_trip("A", "B", DEPARTURE)
             self.assertEqual(caught.exception.code, code)
+
+    @patch("api.providers.requests.get")
+    def test_http_status_diagnostics_never_expose_provider_body_or_key(self, get):
+        for status in (400, 401, 403, 429):
+            response = requests.Response()
+            response.status_code = status
+            get.side_effect = requests.HTTPError("apiKey=SECRET", response=response)
+            with self.assertRaises(TripError) as caught:
+                provider_json("https://example.com", {"apiKey": "SECRET"})
+            self.assertEqual(caught.exception.status, 502)
+            self.assertIn(f"HTTP {status}", caught.exception.message)
+            self.assertNotIn("SECRET", caught.exception.message)
 
     @patch("api.providers.requests.get")
     def test_http_timeout_and_json_failures_are_sanitized(self, get):

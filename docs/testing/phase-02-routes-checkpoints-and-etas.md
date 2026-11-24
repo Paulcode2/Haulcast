@@ -214,17 +214,23 @@ Raw provider error bodies, keyed URLs and credentials are never included in API
 errors. A malformed route fails the request with 502 rather than returning an
 invented geometry or silently reporting an incomplete success.
 
+For HERE HTTP failures, the safe message distinguishes invalid authentication
+(401), denied service access (403), quota/rate limits (429) and invalid parameters
+(400). The API retains HTTP 502 and `provider_error` for these upstream failures.
+
 ## Execution record — 24 November 2026
 
-- Django tests: **23 passed**, including 21 Phase 2 tests and 2 existing health/CORS tests.
+- Django tests: **24 passed**, including 22 Phase 2 tests and 2 existing health/CORS tests.
 - Django system check: **passed**, no issues.
 - Phase 1 provider-checker regressions: **3 passed**.
 - Local HTTP smoke through Django's WSGI application: **passed** for the
   missing-credential path; a valid POST returned HTTP 503 with
   `error.code=provider_not_configured`.
-- Live HERE smoke test: **BLOCKED — `HERE_API_KEY` is still missing**. No live
-  geocoding or routing success is claimed. Set the backend key and run the request
-  above to complete verification.
+- Initial live HERE smoke test was blocked by a missing key. A subsequent key
+  was configured, but direct geocoding and truck routing diagnostic requests both
+  returned **HTTP 401**, with HERE reporting `apiKey invalid. apiKey not found.`
+  Live verification is now **BLOCKED by an invalid HERE key**. Replace the key
+  locally and restart Django; no live geocoding or routing success is claimed.
 
 ## Provider references
 

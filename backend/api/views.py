@@ -3,6 +3,7 @@ from rest_framework.response import Response
 from .providers import TripError, fetch_trip
 from .routing import normalize_routes
 from .serializers import TripSerializer
+from .weather import enrich_routes
 
 
 @api_view(["GET"])
@@ -19,10 +20,12 @@ def analyze_trip(request):
     try:
         locations, raw_routes = fetch_trip(data["origin"], data["destination"], data["departure_time"])
         routes = normalize_routes(raw_routes, data["departure_time"], data["checkpoint_interval_miles"])
+        weather_coverage = enrich_routes(routes, data["load_weight_lbs"])
     except TripError as exc:
         return Response({"error": {"code": exc.code, "message": exc.message}}, status=exc.status)
     return Response({"origin": locations[0], "destination": locations[1],
                      "departure_time": data["departure_time"].isoformat(),
                      "load_weight_lbs": data["load_weight_lbs"], "weight_semantics": "cargo_only",
                      "checkpoint_interval_miles": data["checkpoint_interval_miles"],
+                     "weather_coverage": weather_coverage,
                      "route_count": len(routes), "routes": routes})

@@ -23,6 +23,15 @@ def provider_json(url, params):
         return data
     except requests.Timeout:
         raise TripError("provider_timeout", "HERE timed out. Please retry.", 504) from None
+    except requests.HTTPError as exc:
+        status = exc.response.status_code if exc.response is not None else None
+        messages = {
+            401: "HERE rejected the API key (HTTP 401). Replace HERE_API_KEY in backend/.env with a valid HERE API key and restart Django.",
+            403: "HERE denied access (HTTP 403). Check the HERE application's service access and key restrictions.",
+            429: "HERE rate limit or quota exceeded (HTTP 429). Check usage and retry later.",
+            400: "HERE rejected the request parameters (HTTP 400). Check the locations, departure time and routing configuration.",
+        }
+        raise TripError("provider_error", messages.get(status, "HERE request failed. Check backend credentials, service access and quota.")) from None
     except requests.RequestException:
         raise TripError("provider_error", "HERE request failed. Check backend credentials, service access and quota.") from None
     except ValueError:
