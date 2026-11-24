@@ -58,6 +58,7 @@ def checkpoints(points, distances, elapsed, departure, interval):
         elif target == total:
             lat, lng, seconds = *points[-1], elapsed[-1]
         result.append({"index": len(result), "distance_miles": round(target / METRES_PER_MILE, 6),
+                       "distance_meters": target,
                        "latitude": lat, "longitude": lng, "eta": timestamp(departure, seconds)})
     return result
 
