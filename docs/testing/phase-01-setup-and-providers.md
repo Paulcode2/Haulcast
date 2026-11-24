@@ -16,6 +16,10 @@ needs no key for this assessment; review its terms before commercial deployment.
 
 From the repository root, PowerShell:
 
+The `.venv` in this workspace is already installed. For normal use, skip
+installation and go to **Start and verify both apps** below. Run the following
+setup commands only for a fresh checkout without an existing environment.
+
 ```powershell
 python -m venv .venv
 ./.venv/Scripts/python.exe -m pip install -r backend/requirements.lock.txt
@@ -221,6 +225,13 @@ the saved evidence is a snapshot, not a guarantee of future alternatives.
 - **ENOSPC / Errno 28:** free disk space before reinstalling dependencies. Never
   interpret an incomplete installation as a code/test failure. Only delete this
   project's generated dependencies if a clean reinstall is needed.
+- **Unable to copy `venvlauncher.exe` to `.venv/Scripts/python.exe`:** do not run
+  `python -m venv .venv` using that same environment's Python. Windows cannot
+  overwrite the running executable. The existing environment may still work;
+  check with `./.venv/Scripts/python.exe backend/manage.py check` from the root,
+  then use the start commands above. If a new environment is actually needed,
+  deactivate the current environment and use the base Python interpreter to
+  create it after stopping processes that use the target environment.
 - **Provider network failure:** check DNS, proxy, outbound HTTPS and certificates;
   the checker has a 30-second timeout and does not disable TLS verification.
 
