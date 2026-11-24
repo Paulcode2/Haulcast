@@ -35,5 +35,5 @@ return { routes, route_count: routes.length, recommended_route_id: excluded || !
 export async function mockBase(page) {
 await page.route('**/api/health/', route => route.fulfill({ json: { status: 'ok' } }));
 // Deterministic blank tiles; real MapLibre rendering/GeoJSON/markers still run.
-await page.route('https://tile.openstreetmap.org/**', route => route.fulfill({ contentType: 'image/png', body: Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aS1sAAAAASUVORK5CYII=', 'base64') }));
+await page.route('https://tile.openstreetmap.org/**', route => route.fulfill({ path: 'tests/tile-256.png' }));
 }

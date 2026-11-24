@@ -16,8 +16,9 @@ map = new maplibregl.Map({ container: container.current, center: [9.1, 50.7], zo
 style: { version: 8, sources: { streets: { type: 'raster', tiles: ['https://tile.openstreetmap.org/{z}/{x}/{y}.png'], tileSize: 256, attribution: '© <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">OpenStreetMap contributors</a>' } }, layers: [{ id: 'background', type: 'background', paint: { 'background-color': '#e7edf1' } }, { id: 'streets', type: 'raster', source: 'streets' }] } });
 mapRef.current = map;
 map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-right');
-map.on('error', () => setMapError('Some map tiles could not load. Route cards and checkpoint details remain available.'));
-map.on('load', () => {
+map.on('error', e => { if (e?.sourceId === 'streets' || e?.tile) setMapError('Some map tiles could not load. Route cards and checkpoint details remain available.'); });
+const initOverlays = () => {
+if (map.getSource('routes')) return;
 map.addSource('routes', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
 map.addSource('heatmap', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
 map.addLayer({ id: 'corridor-heat', type: 'circle', source: 'heatmap', paint: { 'circle-radius': ['interpolate', ['linear'], ['zoom'], 5, 5, 10, 11], 'circle-color': ['get', 'color'], 'circle-opacity': 0.55, 'circle-stroke-width': 0 } });
@@ -27,7 +28,9 @@ map.on('click', 'route-lines', e => latest.current.onSelect(e.features[0].proper
 map.on('mouseenter', 'route-lines', () => { map.getCanvas().style.cursor = 'pointer'; });
 map.on('mouseleave', 'route-lines', () => { map.getCanvas().style.cursor = ''; });
 setReady(true);
-});
+};
+if (map.isStyleLoaded()) initOverlays();
+else { map.on('styledata', () => { if (map.isStyleLoaded()) initOverlays(); }); map.on('load', initOverlays); }
 const observer = new ResizeObserver(() => map.resize()); observer.observe(container.current);
 return () => { observer.disconnect(); map.remove(); mapRef.current = null; };
 } catch { setMapError('Map unavailable: this browser needs WebGL. Use the route cards and checkpoint list below.'); map?.remove(); }
