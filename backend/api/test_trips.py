@@ -103,6 +103,9 @@ class TripAPITests(SimpleTestCase):
         weather_patch = patch("api.views.enrich_routes", return_value={"complete": 0, "partial": 0, "unavailable": 0})
         weather_patch.start()
         self.addCleanup(weather_patch.stop)
+        corridor_patch = patch("api.views.build_corridor_forecast", return_value={"forecast_reference_time": "2026-11-25T08:00:00Z", "timezone": "UTC", "hour_count": 49, "timestamps": [], "sample_count": 0, "truncated": False, "points": []})
+        corridor_patch.start()
+        self.addCleanup(corridor_patch.stop)
         self.payload = {"origin": "Frankfurt am Main, Germany", "destination": "Kassel, Germany", "departure_time": DEPARTURE.isoformat(), "load_weight_lbs": 12000}
 
     def post(self, payload=None):

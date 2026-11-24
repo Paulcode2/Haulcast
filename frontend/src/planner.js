@@ -15,6 +15,13 @@ export function validate(form) {
 export const miles = value => Number.isFinite(value) ? `${value.toFixed(1)} mi` : 'Unavailable';
 export const duration = seconds => `${Math.floor(seconds / 3600)}h ${Math.floor((seconds % 3600) / 60)}m`;
 export const utcTime = value => value && Number.isFinite(Date.parse(value)) ? `${new Date(value).toISOString().replace('T', ' ').slice(0, 19)} UTC` : 'Unavailable';
+export const corridorHourLabel = (corridor, hour) => corridor?.timestamps?.[hour] ? utcTime(corridor.timestamps[hour]) : 'Unavailable';
+export function corridorHourStats(corridor, hour) {
+ if (!corridor || !Array.isArray(corridor.points)) return { available: 0, total: 0 };
+ let available = 0;
+ for (const point of corridor.points) if (point.intensities?.[hour] != null) available++;
+ return { available, total: corridor.points.length };
+}
 export const weatherValue = (value, unit) => Number.isFinite(value) ? `${value.toFixed(2)} ${unit}` : 'Unavailable';
 export function checkpointText(point) {
   const w = point.weather || {}, r = point.risk || {}, v = w.values || {};
