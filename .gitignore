@@ -1,9 +1,12 @@
 .env
 .env.*
 !.env.example
+!.env.production.example
 .venv/
 node_modules/
 dist/
+frontend/dist/
+backend/staticfiles/
 __pycache__/
 *.py[cod]
 *.sqlite3
