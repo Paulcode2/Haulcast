@@ -9,6 +9,6 @@ COPY backend/requirements.lock.txt ./backend/requirements.lock.txt
 RUN pip install --no-cache-dir -r backend/requirements.lock.txt
 COPY backend/ ./backend/
 WORKDIR /app/backend
-RUN python manage.py collectstatic --noinput
+RUN DJANGO_SECRET_KEY=build-time-only python manage.py collectstatic --noinput
 EXPOSE 8000
 CMD ["sh", "-c", "gunicorn config.wsgi --bind 0.0.0.0:$PORT --workers 3 --timeout 60 --access-logfile - --error-logfile -"]
